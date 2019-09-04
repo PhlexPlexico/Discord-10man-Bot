@@ -110,7 +110,7 @@ async def on_message(message):
             readyUsers.remove(secondCaptain)
             #send a message about captains and picks
             await message.channel.send("First captain is now " + firstCaptain.mention + ". Second captain is now " + secondCaptain.mention)
-            await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick @user. Please choose from " + " ".join(readyUsers))
+            await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick @user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
         else:
             await message.channel.send("Please pick two captains!! !captains captain1 captain2")
         
@@ -152,9 +152,9 @@ async def on_message(message):
                 return
             #check if we need to pick again or its other captains turn
             if(pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7 or pickNum == 9):
-                await message.channel.send(secondCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
+                await message.channel.send(secondCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
             else:
-                await message.channel.send(firstCaptain.mention + " please pick again from" + " ".join(readyUsers))
+                await message.channel.send(firstCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
 
         #similar to above, just for team 2 and captain 2
         elif author == secondCaptain and (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
@@ -182,9 +182,9 @@ async def on_message(message):
                 pickNum = 1
                 return
             if(pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8 or pickNum == 10):
-                await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
+                await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
             else:
-                await message.channel.send(secondCaptain.mention + " please pick again from" + " ".join(readyUsers))
+                await message.channel.send(secondCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
 
         else:
             await message.channel.send("You're not a captain, sorry")
@@ -209,7 +209,7 @@ async def on_message(message):
         await message.channel.send("Current 10man finished, to make a new one, we need 10 ready users")    
     
     elif message.content.startswith('!whosready'):
-        await message.channel.send(" ".join(readyUsers))
+        await message.channel.send(" ".join(str(x.mention) for x in readyUsers))
 
 
 client.run(myToken.token)
