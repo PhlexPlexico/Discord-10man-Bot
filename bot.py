@@ -91,7 +91,7 @@ async def on_message(message):
                         await message.channel.send(message + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
-                await await message.channel.send("WE HAWWT. Please pick two captains by doing !captains captain1 captain2")
+                await message.channel.send("WE HAWWT. Please pick two captains by doing !captains captain1 captain2")
                 inProgress = True
 
             await message.channel.send(author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
