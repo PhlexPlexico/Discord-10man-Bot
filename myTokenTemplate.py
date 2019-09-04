@@ -1,5 +1,7 @@
 token = 'token here'
-guildID = 'guild/server ID here'
-team1ChannelId = 'Team 1 Channel ID Here'
-team2ChannelId = 'Team 2 Channel ID Here'
-setupChannelId = 'Setup Channel ID Here'
+# PLEASE USE INTEGERS NOT STRINGS. Grab the server ID and channel IDs for the channels you wish to use. 
+guildID = 0
+team1ChannelId = 0
+team2ChannelId = 0
+setupChannelId = 0
+csRoleID = 0

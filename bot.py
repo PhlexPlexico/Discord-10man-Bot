@@ -16,7 +16,6 @@ currentPickingCaptain = ""
 pickNum = 1
 team1VoiceChannel = None
 team2VoiceChannel = None
-
 serverName = myToken.guildID
 
 @client.event
@@ -25,7 +24,7 @@ async def on_ready():
     global team1VoiceChannel
     global team2VoiceChannel
     global testchannel
-
+    
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
@@ -64,7 +63,7 @@ async def on_message(message):
 
     #extract the author from the message
     #have to split since it comes in like Meeoh#3282
-    author = str(message.author).split("#")[0]
+    author = str(message.author)
 
     #make sure they're using either our testchannel or bot setup channel
     if(message.channel.id != myToken.setupChannelId and message.content.startswith("!")):
@@ -75,7 +74,7 @@ async def on_message(message):
     #ready command
     if (message.content.startswith("!gaben") or message.content.startswith('!ready')) and inProgress == False and len(readyUsers) < 10:        
         #check if they are already ready
-        if(author in readyUsers):            
+        if(author.upper() in readyUsers):            
             await message.channel.send("You're already ready, chill.")
         #actually readying up
         else:
@@ -84,14 +83,11 @@ async def on_message(message):
 
             if(len(readyUsers) == 8 or len(readyUsers) == 9):
                 it = iter(ourServer.members)
-                message = ""
-                for user in it:
-                    if(str(user.status) == "online" and user.id != client.user.id and user.name not in readyUsers):
-                        message = message + " @" + user.name
-                        await message.channel.send(message + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
+                message = " <@&" + myToken.csRoleID + ">"
+                await message.channel.send(message + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
-                await message.channel.send("WE HAWWT. Please pick two captains by doing !captains captain1 captain2")
+                await message.channel.send("WE HAWWT. Please pick two captains by doing !captains captain1, captain2")
                 inProgress = True
 
             await message.channel.send(author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
@@ -105,8 +101,8 @@ async def on_message(message):
             return
 
         #get the first and second captains, remove them from the ready list
-        firstCaptain = message.content.split(" ",1)[1].split()[0].upper()
-        secondCaptain = message.content.split(" ",1)[1].split()[1].upper()
+        firstCaptain = message.content.split(",",1)[1].split()[0].upper()
+        secondCaptain = message.content.split(",",1)[1].split()[1].upper()
         readyUsers.remove(firstCaptain)
         readyUsers.remove(secondCaptain)
         #send a message about captains and picks
