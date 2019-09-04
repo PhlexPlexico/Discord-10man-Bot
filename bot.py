@@ -31,7 +31,7 @@ async def on_ready():
     print(client.user.id)
     print('------')    
     #loop over all the servers the bots apart
-    t = iter(client.servers)        
+    t = iter(client.guilds)        
     for server in t:            
         #we're trying to find one that has serverName (line 20)
         if(server.id == serverName):            
@@ -69,14 +69,14 @@ async def on_message(message):
     #make sure they're using either our testchannel or bot setup channel
     if(message.channel.id != myToken.setupChannelId and message.content.startswith("!")):
         #if they aren't using an appropriate channel, send a message and return
-        await client.send_message(message.channel, "Please use the setup channel!")
+        await message.channel.send("Please use the setup channel!")
         return    
 
     #ready command
     if (message.content.startswith("!gaben") or message.content.startswith('!ready')) and inProgress == False and len(readyUsers) < 10:        
         #check if they are already ready
         if(author in readyUsers):            
-            await client.send_message(message.channel, "You're already ready, chill.")
+            await message.channel.send("You're already ready, chill.")
         #actually readying up
         else:
             #add them to the ready list and send a message
@@ -88,20 +88,20 @@ async def on_message(message):
                 for user in it:
                     if(str(user.status) == "online" and user.id != client.user.id and user.name not in readyUsers):
                         message = message + " @" + user.name
-                        await client.send_message(message.channel, message + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
+                        await message.channel.send(message + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
-                await client.send_message(message.channel, "WE HAWWT. Please pick two captains by doing !captains captain1 captain2")
+                await await message.channel.send("WE HAWWT. Please pick two captains by doing !captains captain1 captain2")
                 inProgress = True
 
-            await client.send_message(message.channel, author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
+            await message.channel.send(author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
 
 
     #captains command
     elif (message.content.startswith('!captains') and inProgress == True):
         #make sure we dont already have captains
         if (firstCaptain != "" and secondCaptain != ""):
-            await client.send_message(message.channel, "We already have captains. To change them do !done and start over")
+            await message.channel.send("We already have captains. To change them do !done and start over")
             return
 
         #get the first and second captains, remove them from the ready list
@@ -110,8 +110,8 @@ async def on_message(message):
         readyUsers.remove(firstCaptain)
         readyUsers.remove(secondCaptain)
         #send a message about captains and picks
-        await client.send_message(message.channel, "First captain is now " + firstCaptain + ". Second captain is now " + secondCaptain)
-        await client.send_message(message.channel, firstCaptain + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
+        await message.channel.send("First captain is now " + firstCaptain + ". Second captain is now " + secondCaptain)
+        await message.channel.send(firstCaptain + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
         
     #pick command
     elif (message.content.startswith('!pick') and inProgress == True and pickNum < 10):
@@ -121,7 +121,7 @@ async def on_message(message):
             pickedUser = message.content.split(" ",1)[1]
             #make sure hes a real user
             if(pickedUser.upper() not in (name.upper() for name in readyUsers)):
-                await client.send_message(message.channel, pickedUser + " is not a real user, please pick again")
+                await message.channel.send(pickedUser + " is not a real user, please pick again")
                 return
 
             #add him to team one
@@ -145,7 +145,7 @@ async def on_message(message):
 
             #check if we're done picking
             if(pickNum == 10):
-                await client.send_message(message.channel, "The teams are now made and bot setup is finished.")
+                await message.channel.send("The teams are now made and bot setup is finished.")
                 inProgress = False
                 readyUsers = []
                 firstCaptain = ""
@@ -154,15 +154,15 @@ async def on_message(message):
                 return
             #check if we need to pick again or its other captains turn
             if(pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7 or pickNum == 9):
-                await client.send_message(message.channel, secondCaptain + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
+                await message.channel.send(secondCaptain + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
             else:
-                await client.send_message(message.channel, firstCaptain + " please pick again from" + " ".join(readyUsers))
+                await message.channel.send(firstCaptain + " please pick again from" + " ".join(readyUsers))
 
         #similar to above, just for team 2 and captain 2
         elif author.upper() == secondCaptain.upper() and (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
             pickedUser = message.content.split(" ",1)[1]
             if(pickedUser.upper() not in (name.upper() for name in readyUsers)):
-                await client.send_message(message.channel, pickedUser + " is not a real user, please pick again")
+                await message.channel.send(pickedUser + " is not a real user, please pick again")
                 return
             teamTwo.append(pickedUser)
             
@@ -179,7 +179,7 @@ async def on_message(message):
 
             pickNum+=1
             if(pickNum == 10):
-                await client.send_message(message.channel, "The teams are now made and bot setup is finished.")
+                await message.channel.send("The teams are now made and bot setup is finished.")
                 inProgress = False
                 readyUsers = []
                 firstCaptain = ""
@@ -187,12 +187,12 @@ async def on_message(message):
                 pickNum = 1
                 return
             if(pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8 or pickNum == 10):
-                await client.send_message(message.channel, firstCaptain + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
+                await message.channel.send(firstCaptain + " it is now your pick, pick with !pick user. Please choose from " + " ".join(readyUsers))
             else:
-                await client.send_message(message.channel, secondCaptain + " please pick again from" + " ".join(readyUsers))
+                await message.channel.send(secondCaptain + " please pick again from" + " ".join(readyUsers))
 
         else:
-            await client.send_message(message.channel, "You're not a captain, sorry")
+            await message.channel.send("You're not a captain, sorry")
 
     #unready command               
     elif (message.content.startswith('!unready') or message.content.startswith('!ungaben')) and inProgress == False:
@@ -201,7 +201,7 @@ async def on_message(message):
             if user.upper() == author.upper():
                 readyUsers.remove(user)
                 #unready message
-                await client.send_message(message.channel, author + " You are no longer ready. We now need " + str(10 - len(readyUsers)) + " more")            
+                await message.channel.send(author + " You are no longer ready. We now need " + str(10 - len(readyUsers)) + " more")            
                 break
 
     #stopping one        
@@ -211,10 +211,10 @@ async def on_message(message):
         firstCaptain = ""
         secondCaptain = ""
         pickNum = 1
-        await client.send_message(message.channel, "Current 10man finished, to make a new one, we need 10 ready users")    
+        await message.channel.send("Current 10man finished, to make a new one, we need 10 ready users")    
     
     elif message.content.startswith('!whosready'):
-        await client.send_message(message.channel, " ".join(readyUsers))
+        await message.channel.send(" ".join(readyUsers))
 
 
 client.run(myToken.token)
