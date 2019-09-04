@@ -17,7 +17,7 @@ pickNum = 1
 team1VoiceChannel = None
 team2VoiceChannel = None
 
-serverName = "10 men"
+serverName = myToken.guildID
 
 @client.event
 async def on_ready():
@@ -34,16 +34,16 @@ async def on_ready():
     t = iter(client.servers)        
     for server in t:            
         #we're trying to find one that has serverName (line 20)
-        if(server.name == serverName):            
+        if(server.id == serverName):            
             #found it, lets hold on to it for later
             ourServer = server
             #In this server, hold on the voice channels for team 1 and team 2 for moving purposes later
             for channel in ourServer.channels:
-                if channel.name == "Team 1":
+                if channel.id == myToken.team1ChannelId:
                     team1VoiceChannel = channel
-                elif channel.name == "Team 2":
+                elif channel.id == myToken.team2ChannelId:
                     team2VoiceChannel = channel
-                elif channel.name== "general":
+                elif channel.id== myToken.setupChannelId:
                     testchannel = channel    
 
 @client.event
@@ -67,16 +67,16 @@ async def on_message(message):
     author = str(message.author).split("#")[0]
 
     #make sure they're using either our testchannel or bot setup channel
-    if(message.channel.name != "testchannel" and message.channel.name != "bot-setup" and message.content.startswith("!")):
+    if(message.channel.id != myToken.setupChannelId and message.content.startswith("!")):
         #if they aren't using an appropriate channel, send a message and return
-        await client.send_message(message.channel, "Please use the bot-setup channel")
+        await client.send_message(message.channel, "Please use the setup channel!")
         return    
 
     #ready command
     if (message.content.startswith("!gaben") or message.content.startswith('!ready')) and inProgress == False and len(readyUsers) < 10:        
         #check if they are already ready
         if(author in readyUsers):            
-            await client.send_message(message.channel, "You're already ready, chill")
+            await client.send_message(message.channel, "You're already ready, chill.")
         #actually readying up
         else:
             #add them to the ready list and send a message
@@ -86,12 +86,12 @@ async def on_message(message):
                 it = iter(ourServer.members)
                 message = ""
                 for user in it:
-                    if(str(user.status) == "online" and user.name != "DAD Scrim BOT" and user.name not in readyUsers):
+                    if(str(user.status) == "online" and user.id != client.user.id and user.name not in readyUsers):
                         message = message + " @" + user.name
                         await client.send_message(message.channel, message + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
-                await client.send_message(message.channel, "we ready boiz. Please pick two captains by doing !captains captain1 captain2")
+                await client.send_message(message.channel, "WE HAWWT. Please pick two captains by doing !captains captain1 captain2")
                 inProgress = True
 
             await client.send_message(message.channel, author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")

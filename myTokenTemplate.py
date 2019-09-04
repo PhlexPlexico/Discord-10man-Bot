@@ -1,1 +1,5 @@
 token = 'token here'
+guildID = 'guild/server ID here'
+team1ChannelId = 'Team 1 Channel ID Here'
+team2ChannelId = 'Team 2 Channel ID Here'
+setupChannelId = 'Setup Channel ID Here'
