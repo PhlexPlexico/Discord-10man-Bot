@@ -90,7 +90,7 @@ async def on_message(message):
                 await message.channel.send("WE HAWWT. Please pick two captains by doing !captains captain1, captain2")
                 inProgress = True
 
-            await message.channel.send(author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
+            await message.channel.send("@" + author + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
 
 
     #captains command
