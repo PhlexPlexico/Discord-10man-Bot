@@ -1,7 +1,8 @@
-import discord
 import asyncio
+import discord
 import myToken
-from pprint import pprint
+import random
+from discord.ext import commands
 
 #loads of vars we'll need to persist
 client = discord.Client()
@@ -23,27 +24,15 @@ async def on_ready():
     global ourServer
     global team1VoiceChannel
     global team2VoiceChannel
-    global testchannel
-    
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
+
+    team1VoiceChannel = client.get_channel(myToken.team1ChannelId)
+    team2VoiceChannel = client.get_channel(myToken.team2ChannelId) 
+    print('------')    
+    print('Logged in as {} with id {}'.format(client.user.name, client.user.id))
+    print('VC1 Name is {}\nVC2 Name is {}'.format(team1VoiceChannel, team2VoiceChannel))
     print('------')    
     #loop over all the servers the bots apart
-    t = iter(client.guilds)        
-    for server in t:            
-        #we're trying to find one that has serverName (line 20)
-        if(server.id == serverName):            
-            #found it, lets hold on to it for later
-            ourServer = server
-            #In this server, hold on the voice channels for team 1 and team 2 for moving purposes later
-            for channel in ourServer.channels:
-                if channel.id == myToken.team1ChannelId:
-                    team1VoiceChannel = channel
-                elif channel.id == myToken.team2ChannelId:
-                    team2VoiceChannel = channel
-                elif channel.id== myToken.setupChannelId:
-                    testchannel = channel    
+    
 
 @client.event
 async def on_message(message):
@@ -57,22 +46,12 @@ async def on_message(message):
     global teamTwo
     global pickNum
 
-
-
-  
-
     #extract the author from the message
-    #have to split since it comes in like Meeoh#3282
     author = message.author
 
-    #make sure they're using either our testchannel or bot setup channel
+    #make sure they're using the bot setup channel
     if(message.channel.id != myToken.setupChannelId): 
-        #if they aren't using an appropriate channel, send a message and return
-        #await message.channel.send("Please use the setup channel!")
-        return
-
-    elif (message.channel.id == myToken.setupChannelId and message.content.startswith("!")):
-        await message.channel.send("Please use the setup channel!")
+        #if they aren't using an appropriate channel, return
         return
 
     #ready command
@@ -80,46 +59,29 @@ async def on_message(message):
         #check if they are already ready
         if(author in readyUsers):            
             await message.channel.send("You're already ready, chill.")
+            return
         #actually readying up
         else:
             #add them to the ready list and send a message
             readyUsers.append(author)
-
             if(len(readyUsers) == 8 or len(readyUsers) == 9):
-                await message.channel.send("<@&" + str(myToken.csRoleID) + ">" + " we only need " + str(10 - len(readyUsers)) + " PLS READY UP")
+                await message.channel.send("<@&" + str(myToken.csRoleID) + ">" + " we only need " + str(10 - len(readyUsers)) + " COME AND JOIN AND HAVE A GOOD TIME!")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
-                await message.channel.send("WE HAWWT. Please pick two captains by doing !captains @captain1 @captain2")
+                await message.channel.send("WE BALLIN'. Now randomly selecting captains.")
                 inProgress = True
+                firstCaptain = readyUsers[random.randrange(len(readyUsers))]
+                readyUsers.remove(firstCaptain)
+                secondCaptain = readyUsers[random.randrange(len(readyUsers))]
+                readyUsers.remove(secondCaptain)
+                await message.channel.send("First captain is now " + firstCaptain.mention + ". Second captain is now " + secondCaptain.mention)
+                await message.channel.send(firstCaptain.name + " it is now your pick, pick with !pick @user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
             elif(len(readyUsers) != 0):
                 await message.channel.send(author.mention + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
-
-
-    #captains command
-    elif (message.content.startswith('!captains') and inProgress == True):
-        #make sure we dont already have captains
-        if (firstCaptain is not None and secondCaptain is not None):
-            await message.channel.send("We already have captains. To change them do !done and start over")
             return
-
-        #get the first and second captains, remove them from the ready list
-        if (len(message.mentions) > 0 and len(message.mentions) < 2):
-            await message.channel.send("Please pick two captains!! !captains @captain1 @captain2")
-        elif (len(message.mentions) > 2):
-            await message.channel.send("Please pick two captains!! !captains @captain1 @captain2")
-        elif (len(message.mentions) == 2):
-            firstCaptain = message.mentions[0]
-            secondCaptain = message.mentions[1]
-            readyUsers.remove(firstCaptain)
-            readyUsers.remove(secondCaptain)
-            #send a message about captains and picks
-            await message.channel.send("First captain is now " + firstCaptain.mention + ". Second captain is now " + secondCaptain.mention)
-            await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick @user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
-        else:
-            await message.channel.send("Please pick two captains!! !captains captain1 captain2")
         
     #pick command
-    elif (message.content.startswith('!pick') and inProgress == True and pickNum < 10):
+    elif (message.content.startswith('!pick') and inProgress == True and pickNum < 9):
         #make sure a captain is picking, and its his turn
         if author == firstCaptain and (pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8):
             #get the user they picked
@@ -130,7 +92,7 @@ async def on_message(message):
             pickedUser = message.mentions[0]
             #make sure hes a real user
             if(pickedUser not in (name for name in readyUsers)):
-                await message.channel.send(str(pickedUser) + " is not in the 10man, please pick again")
+                await message.channel.send(str(pickedUser) + " is not in the 10man, please pick again.")
                 return
 
             #add him to team one
@@ -146,7 +108,7 @@ async def on_message(message):
             pickNum+=1
 
             #check if we're done picking
-            if(pickNum == 10):
+            if(pickNum == 8):
                 await message.channel.send("The teams are now made and bot setup is finished. Please create your match at https://get5.phlexplexi.co")
                 inProgress = False
                 readyUsers = []
@@ -177,14 +139,6 @@ async def on_message(message):
             readyUsers.remove(pickedUser)    
 
             pickNum+=1
-            if(pickNum == 10):
-                await message.channel.send("The teams are now made and bot setup is finished.")
-                inProgress = False
-                readyUsers = []
-                firstCaptain = None
-                secondCaptain = None
-                pickNum = 1
-                return
             if(pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8):
                 await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
             else:
@@ -214,6 +168,5 @@ async def on_message(message):
     
     elif message.content.startswith('!whosready'):
         await message.channel.send(", ".join(str(x.name) for x in readyUsers))
-
 
 client.run(myToken.token)
