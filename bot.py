@@ -66,10 +66,14 @@ async def on_message(message):
     author = message.author
 
     #make sure they're using either our testchannel or bot setup channel
-    if(message.channel.id != myToken.setupChannelId and message.content.startswith("!")):
+    if(message.channel.id != myToken.setupChannelId) 
         #if they aren't using an appropriate channel, send a message and return
+        #await message.channel.send("Please use the setup channel!")
+        return
+
+    elif (message.channel.id == myToken.setupChannelId and message.content.startswith("!")):
         await message.channel.send("Please use the setup channel!")
-        return    
+        return
 
     #ready command
     if (message.content.startswith("!gaben") or message.content.startswith('!ready')) and inProgress == False and len(readyUsers) < 10:        
@@ -82,19 +86,19 @@ async def on_message(message):
             readyUsers.append(author)
 
             if(len(readyUsers) == 8 or len(readyUsers) == 9):
-                await message.channel.send("<@&" + myToken.csRoleID + ">" + " we only need " + 10 - len(readyUsers) + " PLS READY UP")
+                await message.channel.send("<@&" + myToken.csRoleID + ">" + " we only need " + str(10 - len(readyUsers)) + " PLS READY UP")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
                 await message.channel.send("WE HAWWT. Please pick two captains by doing !captains @captain1 @captain2")
                 inProgress = True
-
-            await message.channel.send(author.mention + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
+            elif(len(readyUsers) != 0):
+                await message.channel.send(author.mention + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
 
 
     #captains command
     elif (message.content.startswith('!captains') and inProgress == True):
         #make sure we dont already have captains
-        if (firstCaptain != "" and secondCaptain != ""):
+        if (firstCaptain is not None and secondCaptain is not None):
             await message.channel.send("We already have captains. To change them do !done and start over")
             return
 
@@ -133,7 +137,7 @@ async def on_message(message):
             teamOne.append(pickedUser)
 
             #move him to voice channel for team 1
-            pickedUser.move_to(team1VoiceChannel, "Moving for 10man.")
+            await pickedUser.move_to(team1VoiceChannel)
             
             #remove him from ready users
             readyUsers.remove(pickedUser)     
@@ -167,7 +171,7 @@ async def on_message(message):
             teamTwo.append(pickedUser)
             
             #move him to voice channel for team 2
-            pickedUser.move_to(team2VoiceChannel, "Moving for 10man.")
+            await pickedUser.move_to(team2VoiceChannel)
 
             #remove him from ready users
             readyUsers.remove(pickedUser)    
@@ -209,7 +213,7 @@ async def on_message(message):
         await message.channel.send("Current 10man finished, to make a new one, we need 10 ready users")    
     
     elif message.content.startswith('!whosready'):
-        await message.channel.send(" ".join(str(x.mention) for x in readyUsers))
+        await message.channel.send(" ".join(str(x.name) for x in readyUsers))
 
 
 client.run(myToken.token)
