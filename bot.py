@@ -108,7 +108,7 @@ async def on_message(message):
 
             #check if we're done picking
             if(pickNum == 8):
-                message = '''The teams are now made and bot setup is finished. Please create your match at https://get5.phlexplexi.co
+                message = '''The teams are now made and bot setup is finished.
                 
                 Team 1: ''' + ", ".join(sorted(str(x.name) for x in teamOne)) + '''
                 
@@ -116,7 +116,7 @@ async def on_message(message):
 
                 Good luck and have fun!'''
 
-                await message.channel.send("The teams are now made and bot setup is finished. Please create your match at https://get5.phlexplexi.co")
+                await message.channel.send(message)
                 inProgress = False
                 readyUsers = []
                 firstCaptain = None
