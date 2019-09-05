@@ -86,7 +86,7 @@ async def on_message(message):
             readyUsers.append(author)
 
             if(len(readyUsers) == 8 or len(readyUsers) == 9):
-                await message.channel.send("<@&" + myToken.csRoleID + ">" + " we only need " + str(10 - len(readyUsers)) + " PLS READY UP")
+                await message.channel.send("<@&" + str(myToken.csRoleID) + ">" + " we only need " + str(10 - len(readyUsers)) + " PLS READY UP")
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
                 await message.channel.send("WE HAWWT. Please pick two captains by doing !captains @captain1 @captain2")
@@ -155,7 +155,7 @@ async def on_message(message):
                 pickNum = 1
                 return
             #check if we need to pick again or its other captains turn
-            if(pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7 or pickNum == 9):
+            if(pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
                 await message.channel.send(secondCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
             else:
                 await message.channel.send(firstCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
@@ -185,7 +185,7 @@ async def on_message(message):
                 secondCaptain = None
                 pickNum = 1
                 return
-            if(pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8 or pickNum == 10):
+            if(pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8):
                 await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
             else:
                 await message.channel.send(secondCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
@@ -213,7 +213,7 @@ async def on_message(message):
         await message.channel.send("Current 10man finished, to make a new one, we need 10 ready users")    
     
     elif message.content.startswith('!whosready'):
-        await message.channel.send(" ".join(str(x.name) for x in readyUsers))
+        await message.channel.send(", ".join(str(x.name) for x in readyUsers))
 
 
 client.run(myToken.token)
