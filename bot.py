@@ -2,7 +2,6 @@ import asyncio
 import discord
 import myToken
 import random
-from discord.ext import commands
 
 #loads of vars we'll need to persist
 client = discord.Client()
@@ -116,7 +115,7 @@ async def on_message(message):
                 Team 2: ''' + ", ".join(sorted(str(x.name) for x in teamTwo)) + '''
 
                 Good luck and have fun!'''
-                
+
                 await message.channel.send("The teams are now made and bot setup is finished. Please create your match at https://get5.phlexplexi.co")
                 inProgress = False
                 readyUsers = []
