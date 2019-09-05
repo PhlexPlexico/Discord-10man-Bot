@@ -55,7 +55,7 @@ async def on_message(message):
         return
 
     #ready command
-    if (message.content.startswith("!gaben") or message.content.startswith('!ready')) and inProgress == False and len(readyUsers) < 10:        
+    if (message.content == '!gaben' or message.content == '!ready') and inProgress == False and len(readyUsers) < 10:        
         #check if they are already ready
         if(author in readyUsers):            
             await message.channel.send("You're already ready, chill.")
@@ -109,6 +109,14 @@ async def on_message(message):
 
             #check if we're done picking
             if(pickNum == 8):
+                message = '''The teams are now made and bot setup is finished. Please create your match at https://get5.phlexplexi.co
+                
+                Team 1: ''' + ", ".join(sorted(str(x.name) for x in teamOne)) + '''
+                
+                Team 2: ''' + ", ".join(sorted(str(x.name) for x in teamTwo)) + '''
+
+                Good luck and have fun!'''
+                
                 await message.channel.send("The teams are now made and bot setup is finished. Please create your match at https://get5.phlexplexi.co")
                 inProgress = False
                 readyUsers = []
@@ -145,10 +153,11 @@ async def on_message(message):
                 await message.channel.send(secondCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
 
         else:
-            await message.channel.send("You're not a captain, sorry")
+            await message.channel.send("You're not a captain, sorry, but please let the captains select!")
+        return
 
     #unready command               
-    elif (message.content.startswith('!unready') or message.content.startswith('!ungaben')) and inProgress == False:
+    elif (message.content == '!unready' or message.content == '!ungaben' and inProgress == False):
         #make sure the user exists
         for user in readyUsers:
             if user == author:
@@ -156,17 +165,23 @@ async def on_message(message):
                 #unready message
                 await message.channel.send(author.mention + " You are no longer ready. We now need " + str(10 - len(readyUsers)) + " more")            
                 break
+        return
 
     #stopping one        
-    elif message.content.startswith('!done'):
+    elif message.content == '!done':
         inProgress = False
         readyUsers = []
         firstCaptain = None
         secondCaptain = None
         pickNum = 1
         await message.channel.send("Current 10man finished, to make a new one, we need 10 ready users")    
+        return
     
     elif message.content.startswith('!whosready'):
-        await message.channel.send(", ".join(str(x.name) for x in readyUsers))
+        if (len(readyUsers) == 0):
+            await message.channel.send("There is currently no players in queue!")
+        else:
+            await message.channel.send(", ".join(sorted(str(x.name) for x in readyUsers)))
+        return
 
 client.run(myToken.token)
