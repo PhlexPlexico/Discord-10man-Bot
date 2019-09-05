@@ -117,6 +117,8 @@ async def on_message(message):
                 Good luck and have fun!'''
 
                 await message.channel.send(message)
+                await firstCaptain.move_to(team1VoiceChannel)
+                await secondCaptain.move_to(team1VoiceChannel)
                 inProgress = False
                 readyUsers = []
                 firstCaptain = None
