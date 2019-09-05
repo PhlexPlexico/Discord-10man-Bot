@@ -66,7 +66,7 @@ async def on_message(message):
     author = message.author
 
     #make sure they're using either our testchannel or bot setup channel
-    if(message.channel.id != myToken.setupChannelId) 
+    if(message.channel.id != myToken.setupChannelId): 
         #if they aren't using an appropriate channel, send a message and return
         #await message.channel.send("Please use the setup channel!")
         return
