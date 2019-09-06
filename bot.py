@@ -2,9 +2,13 @@ import asyncio
 import discord
 import myToken
 import random
+from discord.ext import commands
+from discord.ext.commands import bot
 
 #loads of vars we'll need to persist
-client = discord.Client()
+bot = commands.Bot(command_prefix=myToken.prefix, description=myToken.description)
+
+        
 ourServer = None
 inProgress = False
 readyUsers = []
@@ -18,23 +22,7 @@ team1VoiceChannel = None
 team2VoiceChannel = None
 serverName = myToken.guildID
 
-@client.event
-async def on_ready():
-    global ourServer
-    global team1VoiceChannel
-    global team2VoiceChannel
-
-    team1VoiceChannel = client.get_channel(myToken.team1ChannelId)
-    team2VoiceChannel = client.get_channel(myToken.team2ChannelId) 
-    print('------')    
-    print('Logged in as {} with id {}'.format(client.user.name, client.user.id))
-    print('VC1 Name is {}\nVC2 Name is {}'.format(team1VoiceChannel, team2VoiceChannel))
-    print('------')    
-    #loop over all the servers the bots apart
-    
-
-@client.event
-async def on_message(message):
+def readyUp(ctx):
     #we received a message
     #modifying these globals
     global inProgress
@@ -45,8 +33,9 @@ async def on_message(message):
     global teamTwo
     global pickNum
 
-    #extract the author from the message
-    author = message.author
+    #extract the author and message from context.
+    author = ctx.author
+    message = ctx.message
 
     #make sure they're using the bot setup channel
     if(message.channel.id != myToken.setupChannelId): 
@@ -54,44 +43,99 @@ async def on_message(message):
         return
 
     #ready command
-    if (message.content == '!gaben' or message.content == '!ready') and inProgress == False and len(readyUsers) < 10:        
+    if (inProgress == False and len(readyUsers) < 10):        
         #check if they are already ready
-        if(author in readyUsers):            
-            await message.channel.send("You're already ready, chill.")
+        if(author in readyUsers):
+            embed = discord.Embed(description=author.mention + "You're already ready, chill.", color=0x03f0fc)
+            await ctx.send(embed=embed)        
             return
         #actually readying up
         else:
             #add them to the ready list and send a message
             readyUsers.append(author)
             if(len(readyUsers) == 8 or len(readyUsers) == 9):
-                await message.channel.send("<@&" + str(myToken.csRoleID) + ">" + " we only need " + str(10 - len(readyUsers)) + " COME AND JOIN AND HAVE A GOOD TIME!")
+                embed = discord.Embed(description="<@&" + str(myToken.csRoleID) + ">" + " we only need " + str(10 - len(readyUsers)) + " more players. `!ready` to join", color=0x03f0fc)
+                await ctx.send(embed=embed)
             elif(len(readyUsers) == 10):
                 #we have 10 ready users, now need captains
-                await message.channel.send("WE BALLIN'. Now randomly selecting captains.")
+                embed = discord.Embed(description="**WE BALLIN'. Now randomly selecting captains.**", color=0x03f0fc)
+                await ctx.send(embed=embed)
                 inProgress = True
                 firstCaptain = readyUsers[random.randrange(len(readyUsers))]
                 readyUsers.remove(firstCaptain)
                 secondCaptain = readyUsers[random.randrange(len(readyUsers))]
                 readyUsers.remove(secondCaptain)
-                await message.channel.send("First captain is now " + firstCaptain.mention + ". Second captain is now " + secondCaptain.mention)
-                await message.channel.send(firstCaptain.name + " it is now your pick, pick with !pick @user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
+                embed = discord.Embed(description="**Captains**\nTeam: " + firstCaptain.mention + "\nTeam: " + secondCaptain.mention, color=0x03f0fc)
+                await ctx.send(embed=embed)
+                embed = discord.Embed(description=firstCaptain.mention + " it is now your pick, pick with `" + myToken.prefix + "pick @user`. Please choose from " + " \n ".join(str(x.mention) for x in readyUsers), color=0x03f0fc)
+                await ctx.send(embed=embed)
             elif(len(readyUsers) != 0):
-                await message.channel.send(author.mention + " is now ready, we need " + str(10 - len(readyUsers)) + " more")
+                embed = discord.Embed(description=author.mention + " **is now ready, we need **" + str(10 - len(readyUsers)) + " **more**", color=0x03f0fc)
+                await ctx.send(embed=embed)
             return
-        
-    #pick command
-    elif (message.content.startswith('!pick') and inProgress == True and pickNum < 9):
+
+def unready(ctx):
+    global readyUsers
+    author = ctx.author
+    try:
+        readyUsers.remove(author)
+        #unready message
+        embed = discord.Embed(description=author.mention + " You are no longer ready. We now need " + str(10 - len(readyUsers)) + " more", color=0x3f0fc)
+        await ctx.send(embed=embed)
+    except ValueError:
+        embed = discord.Embed(description=author.mention + " You are not in the ready list to begin with!", color=0x3f0fc)
+        await ctx.send(embed=embed)
+    
+@bot.event
+async def on_ready():
+    global ourServer
+    global team1VoiceChannel
+    global team2VoiceChannel
+
+    team1VoiceChannel = bot.fetch_channel(myToken.team1ChannelId)
+    team2VoiceChannel = bot.fetch_channel(myToken.team2ChannelId) 
+    print('------')    
+    print('Logged in as {} with id {}'.format(bot.user.name, bot.user.id))
+    print('VC1 Name is {}\nVC2 Name is {}'.format(team1VoiceChannel, team2VoiceChannel))
+    print('------')    
+    #loop over all the servers the bots apart
+    
+@bot.command()
+async def ready(ctx):
+    readyUp(ctx)
+    return
+
+@bot.command()
+async def gaben(ctx):
+    readyUp(ctx)
+    return
+
+@bot.command()
+async def pick(ctx, *, arg):
+    global inProgress
+    global readyUsers
+    global firstCaptain
+    global secondCaptain
+    global teamOne
+    global teamTwo
+    global pickNum
+
+    if (inProgress == True and pickNum < 9):
+        author = ctx.author
+        message = ctx.message
         #make sure a captain is picking, and its his turn
-        if author == firstCaptain and (pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8):
+        if (author == firstCaptain and (pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8)):
             #get the user they picked
             if(len(message.mentions) != 1):
-                await message.channel.send("Please pick a user by @ing them. !pick @user")
+                embed = discord.Embed(description="Please pick a user by @ing them. " + myToken.prefix + "pick @user", color=0x03f0fc)
+                await ctx.send(embed=embed)
                 return
 
             pickedUser = message.mentions[0]
             #make sure hes a real user
             if(pickedUser not in (name for name in readyUsers)):
-                await message.channel.send(str(pickedUser) + " is not in the 10man, please pick again.")
+                embed = discord.Embed(description=str(pickedUser) + " `is not in the 10man, please pick again.`" , color=0x03f0fc)
+                await ctx.send(embed=embed)
                 return
 
             #add him to team one
@@ -108,15 +152,12 @@ async def on_message(message):
 
             #check if we're done picking
             if(pickNum == 8):
-                message = '''The teams are now made and bot setup is finished.
+                embed = discord.Embed(description='''The teams are now made and bot setup is finished.\n
+                Team 1: ''' + ", ".join(str(x.name) for x in teamOne) + '''
                 
-                Team 1: ''' + ", ".join(sorted(str(x.name) for x in teamOne)) + '''
-                
-                Team 2: ''' + ", ".join(sorted(str(x.name) for x in teamTwo)) + '''
-
-                Good luck and have fun!'''
-
-                await message.channel.send(message)
+                Team 2: ''' + ", ".join(str(x.name) for x in teamTwo) + '''
+                **Good luck and have fun!**''', color=0x3f0fc)
+                await ctx.send(embed=embed)
                 await firstCaptain.move_to(team1VoiceChannel)
                 await secondCaptain.move_to(team2VoiceChannel)
                 inProgress = False
@@ -126,16 +167,19 @@ async def on_message(message):
                 pickNum = 1
                 return
             #check if we need to pick again or its other captains turn
-            if(pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
-                await message.channel.send(secondCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
+            if (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
+                embed = discord.Embed(description=secondCaptain.mention + " it is now your pick, pick with "+ myToken.prefix +"pick @user. Please choose from " + " \n ".join(str(x.mention) for x in readyUsers))
+                await ctx.send(embed=embed)
             else:
-                await message.channel.send(firstCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
+                embed = discord.Embed(description=firstCaptain.mention + " it is now your pick, pick with "+ myToken.prefix +"pick @user. Please choose from " + " \n ".join(str(x.mention) for x in readyUsers))
+                await ctx.send(embed=embed)
+            return
 
-        #similar to above, just for team 2 and captain 2
-        elif author == secondCaptain and (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
+        elif (author == secondCaptain and (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7)):
             #get the user they picked
             if(len(message.mentions) != 1):
-                await message.channel.send("Please pick a user by @ing them. !pick @user")
+                embed = discord.Embed(description="Please pick a user by @ing them. " + myToken.prefix + "pick @user", color=0x03f0fc)
+                await ctx.send(embed=embed)
                 return
 
             pickedUser = message.mentions[0]
@@ -149,40 +193,58 @@ async def on_message(message):
 
             pickNum+=1
             if(pickNum == 1 or pickNum == 4 or pickNum == 6 or pickNum == 8):
-                await message.channel.send(firstCaptain.mention + " it is now your pick, pick with !pick user. Please choose from " + " ".join(str(x.mention) for x in readyUsers))
+                embed = discord.Embed(description=firstCaptain.mention + " it is now your pick, pick with "+ myToken.prefix +"pick @user. Please choose from " + " \n ".join(str(x.mention) for x in readyUsers))
+                await ctx.send(embed=embed)
             else:
-                await message.channel.send(secondCaptain.mention + " please pick again from" + " ".join(str(x.mention) for x in readyUsers))
-
+                embed = discord.Embed(description=secondCaptain.mention + " it is now your pick, pick with "+ myToken.prefix +"pick @user. Please choose from " + " \n ".join(str(x.mention) for x in readyUsers))
+                await ctx.send(embed=embed)
+            return
         else:
-            await message.channel.send("You're not a captain, sorry, but please let the captains select!")
-        return
+            embed = discord.Embed(description="You're not a captain, sorry, but please let the captains select!", color=0x03f0fc)
+            await ctx.send(embed=embed)
+    return
 
-    #unready command               
-    elif (message.content == '!unready' or message.content == '!ungaben' and inProgress == False):
-        #make sure the user exists
-        for user in readyUsers:
-            if user == author:
-                readyUsers.remove(user)
-                #unready message
-                await message.channel.send(author.mention + " You are no longer ready. We now need " + str(10 - len(readyUsers)) + " more")            
-                break
-        return
 
-    #stopping one        
-    elif message.content == '!done':
-        inProgress = False
-        readyUsers = []
-        firstCaptain = None
-        secondCaptain = None
-        pickNum = 1
-        await message.channel.send("Current 10man finished, to make a new one, we need 10 ready users")    
-        return
-    
-    elif message.content.startswith('!whosready'):
-        if (len(readyUsers) == 0):
-            await message.channel.send("There is currently no players in queue!")
-        else:
-            await message.channel.send(", ".join(sorted(str(x.name) for x in readyUsers)))
-        return
+@bot.command()
+async def unready(ctx):
+    unready(ctx)
+    return
 
-client.run(myToken.token)
+@bot.command()
+async def ungaben(ctx):
+    unready(ctx)
+    return
+
+@bot.command()
+async def done(ctx):
+    global inProgress
+    global readyUsers
+    global firstCaptain
+    global secondCaptain
+    global teamOne
+    global teamTwo
+    global pickNum
+
+    inProgress = False
+    readyUsers = []
+    teamOne = []
+    teamTwo = []
+    firstCaptain = None
+    secondCaptain = None
+    pickNum = 1
+    embed = discord.Embed(description="**Current 10man finished, need** 10 **readied players**", color=0xff0000)
+    await ctx.send(embed=embed)
+    return
+
+@bot.command()
+async def whosready(ctx):
+    global readyUsers
+    if (len(readyUsers) == 0):
+        embed = discord.Embed(description="There is currently no players in queue!", color=0xff0000)
+        await ctx.send(embed=embed)
+    else:
+        embed = discord.Embed(description="__**Readied Users:**__ \n" + " \n ".join(sorted(str(x.name) for x in readyUsers)), color=0xebe534)
+        await ctx.send(embed=embed)
+    return
+        
+bot.run(myToken.token)
