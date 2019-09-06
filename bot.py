@@ -118,7 +118,7 @@ async def on_message(message):
 
                 await message.channel.send(message)
                 await firstCaptain.move_to(team1VoiceChannel)
-                await secondCaptain.move_to(team1VoiceChannel)
+                await secondCaptain.move_to(team2VoiceChannel)
                 inProgress = False
                 readyUsers = []
                 firstCaptain = None
