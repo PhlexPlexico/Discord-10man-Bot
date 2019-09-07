@@ -24,7 +24,7 @@ team2VoiceChannel = None
 serverName = myToken.guildID
 
 
-def readyUp(ctx):
+async def readyUp(ctx):
     # we received a message
     # modifying these globals
     global inProgress
@@ -83,7 +83,7 @@ def readyUp(ctx):
             return
 
 
-def unready(ctx):
+async def unready(ctx):
     global readyUsers
     author = ctx.author
     try:
