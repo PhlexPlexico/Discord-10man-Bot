@@ -83,7 +83,7 @@ async def readyUp(ctx):
             return
 
 
-async def unready(ctx):
+async def notready(ctx):
     global readyUsers
     author = ctx.author
     try:
@@ -104,8 +104,8 @@ async def on_ready():
     global team1VoiceChannel
     global team2VoiceChannel
 
-    team1VoiceChannel = bot.fetch_channel(myToken.team1ChannelId)
-    team2VoiceChannel = bot.fetch_channel(myToken.team2ChannelId)
+    team1VoiceChannel = bot.get_channel(myToken.team1ChannelId)
+    team2VoiceChannel = bot.get_channel(myToken.team2ChannelId)
     print('------')
     print('Logged in as {} with id {}'.format(bot.user.name, bot.user.id))
     print('VC1 Name is {}\nVC2 Name is {}'.format(
@@ -116,13 +116,13 @@ async def on_ready():
 
 @bot.command()
 async def ready(ctx):
-    readyUp(ctx)
+    await readyUp(ctx)
     return
 
 
 @bot.command()
 async def gaben(ctx):
-    readyUp(ctx)
+    await readyUp(ctx)
     return
 
 
@@ -231,13 +231,13 @@ async def pick(ctx, *, arg):
 
 @bot.command()
 async def unready(ctx):
-    unready(ctx)
+    await notready(ctx)
     return
 
 
 @bot.command()
 async def ungaben(ctx):
-    unready(ctx)
+    await notready(ctx)
     return
 
 
