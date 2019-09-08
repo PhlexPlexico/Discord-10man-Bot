@@ -167,10 +167,8 @@ async def pick(ctx, *, arg):
 
             # increment pick number
             pickNum += 1
-            print(pickNum)
             # check if we're done picking
             if(pickNum == 9):
-                print("Made it to 9 pickNum")
                 embed = discord.Embed(description='''The teams are now made and bot setup is finished.\n
                 Team 1: ''' + ", ".join(str(x.name) for x in teamOne) + '''
                 
