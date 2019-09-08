@@ -52,7 +52,7 @@ async def readyUp(ctx):
                 description=author.mention + "You're already ready, chill.", color=0x03f0fc)
             await ctx.send(embed=embed)
             return
-        actually readying up
+        #actually readying up
         else:
             # add them to the ready list and send a message
             readyUsers.append(author)
@@ -167,6 +167,7 @@ async def pick(ctx, *, arg):
 
             # increment pick number
             pickNum += 1
+            print(pickNum)
             # check if we're done picking
             if(pickNum == 9):
                 embed = discord.Embed(description='''The teams are now made and bot setup is finished.\n
