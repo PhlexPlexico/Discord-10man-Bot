@@ -23,13 +23,6 @@ team1VoiceChannel = None
 team2VoiceChannel = None
 serverName = myToken.guildID
 
-async def channelCheck(channelID):
-    if(channelID != myToken.setupChannelId):
-        # if they aren't using an appropriate channel, return
-        return False
-    else:
-        return True
-
 async def readyUp(ctx):
     # we received a message
     # modifying these globals
@@ -46,8 +39,9 @@ async def readyUp(ctx):
     message = ctx.message
 
     # make sure they're using the bot setup channel
-    if (not channelCheck(message.channel.id)):
-        return
+    if(message.channel.id != myToken.setupChannelId):
+        # if they aren't using an appropriate channel, return
+        return 
 
     # ready command
     if (inProgress == False and len(readyUsers) < 10):
@@ -90,9 +84,10 @@ async def readyUp(ctx):
 
 async def notready(ctx):
     global readyUsers
-    # Check to see if right channel.
-    if (not channelCheck(ctx.message.channel.id)):
-        return
+    # make sure they're using the bot setup channel
+    if(ctx.message.channel.id != myToken.setupChannelId):
+        # if they aren't using an appropriate channel, return
+        return 
     author = ctx.author
     try:
         readyUsers.remove(author)
@@ -161,9 +156,10 @@ async def pick(ctx, *, arg):
     global teamTwo
     global pickNum
 
-    # Check to see if right channel.
-    if (not channelCheck(ctx.message.channel.id)):
-        return
+    # make sure they're using the bot setup channel
+    if(ctx.message.channel.id != myToken.setupChannelId):
+        # if they aren't using an appropriate channel, return
+        return 
     if (inProgress == True and pickNum < 9):
         author = ctx.author
         message = ctx.message
@@ -267,9 +263,10 @@ async def ungaben(ctx):
 
 @bot.command()
 async def done(ctx):
-    # Check to see if right channel.
-    if (not channelCheck(ctx.message.channel.id)):
-        return
+    # make sure they're using the bot setup channel
+    if(ctx.message.channel.id != myToken.setupChannelId):
+        # if they aren't using an appropriate channel, return
+        return 
     doneSelection()
     embed = discord.Embed(
         description="**Current 10man finished, need** 10 **readied players**", color=0xff0000)
@@ -280,9 +277,10 @@ async def done(ctx):
 @bot.command()
 async def whosready(ctx):
     global readyUsers
-    # Check to see if right channel.
-    if (not channelCheck(ctx.message.channel.id)):
-        return
+    # make sure they're using the bot setup channel
+    if(ctx.message.channel.id != myToken.setupChannelId):
+        # if they aren't using an appropriate channel, return
+        return 
     if (len(readyUsers) == 0):
         embed = discord.Embed(
             description="There is currently no players in queue!", color=0xff0000)
