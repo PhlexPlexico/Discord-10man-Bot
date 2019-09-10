@@ -23,6 +23,12 @@ team1VoiceChannel = None
 team2VoiceChannel = None
 serverName = myToken.guildID
 
+async def channelCheck(channelID):
+    if(channelID != myToken.setupChannelId):
+        # if they aren't using an appropriate channel, return
+        return False
+    else:
+        return True
 
 async def readyUp(ctx):
     # we received a message
@@ -40,9 +46,7 @@ async def readyUp(ctx):
     message = ctx.message
 
     # make sure they're using the bot setup channel
-    if(message.channel.id != myToken.setupChannelId):
-        # if they aren't using an appropriate channel, return
-        return
+    channelCheck(message.channel.id)
 
     # ready command
     if (inProgress == False and len(readyUsers) < 10):
@@ -85,6 +89,8 @@ async def readyUp(ctx):
 
 async def notready(ctx):
     global readyUsers
+    # Check to see if right channel.
+    channelCheck(ctx.message.channel.id)
     author = ctx.author
     try:
         readyUsers.remove(author)
@@ -97,6 +103,24 @@ async def notready(ctx):
                               " You are not in the ready list to begin with!", color=0x3f0fc)
         await ctx.send(embed=embed)
 
+
+async def doneSelection():
+    global inProgress
+    global readyUsers
+    global firstCaptain
+    global secondCaptain
+    global teamOne
+    global teamTwo
+    global pickNum
+
+    inProgress = False
+    readyUsers = []
+    teamOne = []
+    teamTwo = []
+    firstCaptain = None
+    secondCaptain = None
+    pickNum = 1
+    return
 
 @bot.event
 async def on_ready():
@@ -125,7 +149,6 @@ async def gaben(ctx):
     await readyUp(ctx)
     return
 
-
 @bot.command()
 async def pick(ctx, *, arg):
     global inProgress
@@ -136,6 +159,8 @@ async def pick(ctx, *, arg):
     global teamTwo
     global pickNum
 
+    # Check to see if right channel.
+    channelCheck(ctx.message.channel.id)
     if (inProgress == True and pickNum < 9):
         author = ctx.author
         message = ctx.message
@@ -178,11 +203,7 @@ async def pick(ctx, *, arg):
                 await ctx.send(embed=embed)
                 await firstCaptain.move_to(team1VoiceChannel)
                 await secondCaptain.move_to(team2VoiceChannel)
-                inProgress = False
-                readyUsers = []
-                firstCaptain = None
-                secondCaptain = None
-                pickNum = 1
+                doneSelection()
                 return
             # check if we need to pick again or its other captains turn
             if (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
@@ -243,21 +264,9 @@ async def ungaben(ctx):
 
 @bot.command()
 async def done(ctx):
-    global inProgress
-    global readyUsers
-    global firstCaptain
-    global secondCaptain
-    global teamOne
-    global teamTwo
-    global pickNum
-
-    inProgress = False
-    readyUsers = []
-    teamOne = []
-    teamTwo = []
-    firstCaptain = None
-    secondCaptain = None
-    pickNum = 1
+    # Check to see if right channel.
+    channelCheck(ctx.message.channel.id)
+    doneSelection()
     embed = discord.Embed(
         description="**Current 10man finished, need** 10 **readied players**", color=0xff0000)
     await ctx.send(embed=embed)
@@ -267,6 +276,8 @@ async def done(ctx):
 @bot.command()
 async def whosready(ctx):
     global readyUsers
+    # Check to see if right channel.
+    channelCheck(ctx.message.channel.id)
     if (len(readyUsers) == 0):
         embed = discord.Embed(
             description="There is currently no players in queue!", color=0xff0000)
