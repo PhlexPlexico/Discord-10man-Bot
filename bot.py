@@ -46,7 +46,8 @@ async def readyUp(ctx):
     message = ctx.message
 
     # make sure they're using the bot setup channel
-    channelCheck(message.channel.id)
+    if (not channelCheck(message.channel.id)):
+        return
 
     # ready command
     if (inProgress == False and len(readyUsers) < 10):
@@ -90,7 +91,8 @@ async def readyUp(ctx):
 async def notready(ctx):
     global readyUsers
     # Check to see if right channel.
-    channelCheck(ctx.message.channel.id)
+    if (not channelCheck(ctx.message.channel.id)):
+        return
     author = ctx.author
     try:
         readyUsers.remove(author)
@@ -160,7 +162,8 @@ async def pick(ctx, *, arg):
     global pickNum
 
     # Check to see if right channel.
-    channelCheck(ctx.message.channel.id)
+    if (not channelCheck(ctx.message.channel.id)):
+        return
     if (inProgress == True and pickNum < 9):
         author = ctx.author
         message = ctx.message
@@ -265,7 +268,8 @@ async def ungaben(ctx):
 @bot.command()
 async def done(ctx):
     # Check to see if right channel.
-    channelCheck(ctx.message.channel.id)
+    if (not channelCheck(ctx.message.channel.id)):
+        return
     doneSelection()
     embed = discord.Embed(
         description="**Current 10man finished, need** 10 **readied players**", color=0xff0000)
@@ -277,7 +281,8 @@ async def done(ctx):
 async def whosready(ctx):
     global readyUsers
     # Check to see if right channel.
-    channelCheck(ctx.message.channel.id)
+    if (not channelCheck(ctx.message.channel.id)):
+        return
     if (len(readyUsers) == 0):
         embed = discord.Embed(
             description="There is currently no players in queue!", color=0xff0000)
