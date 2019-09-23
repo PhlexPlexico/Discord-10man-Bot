@@ -101,24 +101,6 @@ async def notready(ctx):
         await ctx.send(embed=embed)
 
 
-async def doneSelection():
-    global inProgress
-    global readyUsers
-    global firstCaptain
-    global secondCaptain
-    global teamOne
-    global teamTwo
-    global pickNum
-
-    inProgress = False
-    readyUsers = []
-    teamOne = []
-    teamTwo = []
-    firstCaptain = None
-    secondCaptain = None
-    pickNum = 1
-    return
-
 @bot.event
 async def on_ready():
     global ourServer
@@ -202,7 +184,13 @@ async def pick(ctx, *, arg):
                 await ctx.send(embed=embed)
                 await firstCaptain.move_to(team1VoiceChannel)
                 await secondCaptain.move_to(team2VoiceChannel)
-                doneSelection()
+                inProgress = False
+                readyUsers = []
+                teamOne = []
+                teamTwo = []
+                firstCaptain = None
+                secondCaptain = None
+                pickNum = 1
                 return
             # check if we need to pick again or its other captains turn
             if (pickNum == 2 or pickNum == 3 or pickNum == 5 or pickNum == 7):
@@ -263,11 +251,24 @@ async def ungaben(ctx):
 
 @bot.command()
 async def done(ctx):
+    global inProgress
+    global readyUsers
+    global firstCaptain
+    global secondCaptain
+    global teamOne
+    global teamTwo
+    global pickNum
     # make sure they're using the bot setup channel
     if(ctx.message.channel.id != myToken.setupChannelId):
         # if they aren't using an appropriate channel, return
         return 
-    doneSelection()
+    inProgress = False
+    readyUsers = []
+    teamOne = []
+    teamTwo = []
+    firstCaptain = None
+    secondCaptain = None
+    pickNum = 1
     embed = discord.Embed(
         description="**Current 10man finished, need** 10 **readied players**", color=0xff0000)
     await ctx.send(embed=embed)
